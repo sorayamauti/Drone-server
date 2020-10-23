@@ -1,0 +1,44 @@
+version: '3.6'
+networks:
+  network2:
+    name: dronenetwork
+    ipam:
+      config:
+        - subnet: address
+    
+services: 
+    drone-service:
+        image: drone/drone:1
+        ports: 
+            - 0:0
+        volumes: 
+            - /var/lib/drone/yamauchi/drone3:/data
+        restart: always
+        environment: 
+            - DRONE_GITHUB_CLIENT_ID= client id
+            - DRONE_GITHUB_CLIENT_SECRET= client secret
+            - DRONE_RPC_SECRET= rpc secret
+            - DRONE_SERVER_HOST=master.org
+            - DRONE_SERVER_PROTO=https
+            - DRONE_USER_CREATE=username:username,machine:false,admin:true,token:rpc secret
+        networks:
+            - network2
+    
+    drone-runner:
+        image: drone/drone-runner-docker:1
+        ports:
+            - 0:0
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        restart: always
+        environment: 
+            - DRONE_RPC_PROTO=https
+            - DRONE_RPC_HOST=master.org
+            - DRONE_RPC_SECRET=rpc secret
+            - DRONE_RUNNER_CAPACITY=2
+            - DRONE_RUNNER_NAME=runner
+        networks:
+            - network2
+
+
+      
